@@ -7,6 +7,11 @@ import pickle
 
 
 class TrainDataset:
+    """
+       Dataset class
+       - Create an iterator objects for training and eval data
+       - Populate vocab
+    """
 
     def __init__(self, emb_dim=50, mbsize=32, custom_data=False, eval=False, train_data_path="", eval_data_file="",
                  checkpoint_path=""):
