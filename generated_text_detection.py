@@ -24,24 +24,28 @@ class GeneratedTextDetection:
 
         self.args = args
 
-        self.dataset = TrainDataset(mbsize=self.args.mbsize, custom_data=True, eval=True, train_data_path=data_path,
-                                     eval_data_file=self.args.eval_data, checkpoint_path=self.args.vocab_file)
+        self.dataset = TrainDataset(mbsize=self.args.mb_size, custom_data=True, eval=True,
+                                    train_data_path=self.args.eval_data,
+                                    eval_data_file=self.args.eval_data,
+                                    checkpoint_path=self.args.vocab_file)
 
-        self.model = _init_detector()
+        self.model = self._init_detector()
 
     def _init_detector(self):
 
-        self.model = DCVAE(
+        model = DCVAE(
             self.dataset.n_vocab, self.args.h_dim, self.args.z_dim,
             self.args.c_dim, p_word_dropout=0.3, freeze_embeddings=True,
             gpu=self.args.gpu
         )
 
         if self.args.gpu:
-            self.model.load_state_dict(torch.load((self.args.checkpoint + '{}.bin').format(self.args.model_name)))
+            model.load_state_dict(torch.load((self.args.checkpoint + '{}.bin').format(self.args.model_name)))
         else:
-            self.model.load_state_dict(torch.load((self.args.checkpoint + '{}.bin').format(self.args.model_name),
+            model.load_state_dict(torch.load((self.args.checkpoint + '{}.bin').format(self.args.model_name),
                                                   map_location=lambda storage, loc: storage))
+
+        return model
 
     def evaluate(self):
         results = {score: [], evidence: {}}
@@ -65,11 +69,11 @@ def main():
     # Input data and files
     parser.add_argument('--model_name', default="dcvae", type=str,
                         help='name of the model')
-    parser.add_argument('--eval_data', default="/test.csv", type=str,
+    parser.add_argument('--eval_data', default="/content/Generated-Text-Detector/test.csv", type=str,
                         help='input data file for evaluation')
-    parser.add_argument('--vocab_file', default="/vocab.pkl", type=str,
+    parser.add_argument('--vocab_file', default="/content/Generated-Text-Detector/vocab.pkl", type=str,
                         help='saved vocab')
-    parser.add_argument('--check_point', default="/", type=str,
+    parser.add_argument('--check_point', default="/content/Generated-Text-Detector", type=str,
                         help='saved model checkpoint directory')
 
     # Model parameters
