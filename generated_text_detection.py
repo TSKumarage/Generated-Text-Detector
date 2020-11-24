@@ -79,11 +79,11 @@ def main():
     # Input data and files
     parser.add_argument('--model_name', default="dcvae", type=str,
                         help='name of the model')
-    parser.add_argument('--eval_data', default="/content/Generated-Text-Detector/test.csv", type=str,
+    parser.add_argument('--eval_data', default="/content/test.csv", type=str,
                         help='input data file for evaluation')
-    parser.add_argument('--vocab_file', default="/content/Generated-Text-Detector/vocab.pkl", type=str,
+    parser.add_argument('--vocab_file', default="/content/vocab.pkl", type=str,
                         help='saved vocab')
-    parser.add_argument('--check_point', default="/content/Generated-Text-Detector", type=str,
+    parser.add_argument('--check_point', default="/content/", type=str,
                         help='saved model checkpoint directory')
 
     # Model parameters
