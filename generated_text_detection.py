@@ -52,7 +52,10 @@ class GeneratedTextDetection:
 
         with torch.no_grad():
             for data in self.dataset.test_loader:
-                inputs = data.text.cuda()
+                if self.args.gpu:
+                    inputs = data.text.cuda()
+                else:
+                    inputs = data.text
 
                 disc_out = self.model.forward_discriminator(inputs.transpose(0, 1))
 

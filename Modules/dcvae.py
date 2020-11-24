@@ -33,9 +33,10 @@ class DCVAE(nn.Module):
         """
         Word embeddings layer
         """
+        self.emb_dim = 50
+
         if pretrained_embeddings is None:
-            self.emb_dim = h_dim
-            self.word_emb = nn.Embedding(n_vocab, h_dim, self.PAD_IDX)
+            self.word_emb = nn.Embedding(n_vocab, self.emb_dim, self.PAD_IDX)
         else:
             self.emb_dim = pretrained_embeddings.size(1)
             self.word_emb = nn.Embedding(n_vocab, self.emb_dim, self.PAD_IDX)
