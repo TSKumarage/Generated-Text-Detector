@@ -40,15 +40,15 @@ class GeneratedTextDetection:
         )
 
         if self.args.gpu:
-            model.load_state_dict(torch.load((self.args.checkpoint + '{}.bin').format(self.args.model_name)))
+            model.load_state_dict(torch.load((self.args.check_point + '{}.bin').format(self.args.model_name)))
         else:
-            model.load_state_dict(torch.load((self.args.checkpoint + '{}.bin').format(self.args.model_name),
+            model.load_state_dict(torch.load((self.args.check_point + '{}.bin').format(self.args.model_name),
                                                   map_location=lambda storage, loc: storage))
 
         return model
 
     def evaluate(self):
-        results = {score: [], evidence: {}}
+        results = {"score": [], "evidence": {"coherency_score": [], "comsense_consistency": []}}
 
         with torch.no_grad():
             for data in self.dataset.test_loader:
@@ -61,7 +61,14 @@ class GeneratedTextDetection:
 
                 _, predicted = torch.max(disc_out, 1)
 
-                print(predicted)
+                results["score"].extend(predicted.tolist())
+
+                results["evidence"]["coherency_score"].extend([random.uniform(0, 1) for i in range(len(predicted))])
+
+                results["evidence"]["comsense_consistency"].extend(
+                    [random.uniform(0, 1) for i in range(len(predicted))])
+
+        return results
 
 
 def main():
