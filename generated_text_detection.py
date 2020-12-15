@@ -36,6 +36,8 @@ class GeneratedTextDetection:
         # Load the model from checkpoints
         self.model = self._init_detector()
 
+        self.softmax = nn.Softmax(dim=1)
+
     def _init_detector(self):
 
         model = DCVAE(
@@ -70,7 +72,9 @@ class GeneratedTextDetection:
 
                 disc_out = self.model.forward_discriminator(inputs.transpose(0, 1))
 
-                _, predicted = torch.max(disc_out, 1)
+                soft_disc_out = self.softmax(disc_out)
+
+                _, predicted = torch.max(soft_disc_out, 1)
 
                 results["score"].extend(predicted.tolist())
 
