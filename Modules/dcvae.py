@@ -183,14 +183,14 @@ class DCVAE(nn.Module):
         """
         inputs = inputs.unsqueeze(1)  # mbsize x 1 x seq_len x emb_dim
 
-        x3 = F.relu(self.conv3(inputs)).squeeze()
-        x4 = F.relu(self.conv4(inputs)).squeeze()
-        x5 = F.relu(self.conv5(inputs)).squeeze()
+        x3 = F.relu(self.conv3(inputs)).squeeze(-1)
+        x4 = F.relu(self.conv4(inputs)).squeeze(-1)
+        x5 = F.relu(self.conv5(inputs)).squeeze(-1)
 
         # Max-over-time-pool
-        x3 = F.max_pool1d(x3, x3.size(2)).squeeze()
-        x4 = F.max_pool1d(x4, x4.size(2)).squeeze()
-        x5 = F.max_pool1d(x5, x5.size(2)).squeeze()
+        x3 = F.max_pool1d(x3, x3.size(2)).squeeze(-1)
+        x4 = F.max_pool1d(x4, x4.size(2)).squeeze(-1)
+        x5 = F.max_pool1d(x5, x5.size(2)).squeeze(-1)
 
         x = torch.cat([x3, x4, x5], dim=1)
 
