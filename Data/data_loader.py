@@ -98,7 +98,7 @@ class TrainDataset:
                 batch_size=mbsize,
                 device=-1,
                 sort_key=lambda x: len(x.text),
-                shuffle=True,
+                shuffle=False,
                 repeat=False
             )
 
