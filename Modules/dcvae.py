@@ -15,6 +15,7 @@ class DCVAE(nn.Module):
 
     def __init__(self, n_vocab, h_dim, z_dim, c_dim, p_word_dropout=0.3, unk_idx=0, pad_idx=1, start_idx=2, eos_idx=3, max_sent_len=15, pretrained_embeddings=None, freeze_embeddings=False, gpu=False):
         super(DCVAE, self).__init__()
+        torch.manual_seed(1000)
 
         self.UNK_IDX = unk_idx
         self.PAD_IDX = pad_idx
