@@ -16,9 +16,9 @@ from torch.utils.data import DataLoader, DistributedSampler, RandomSampler
 from tqdm import tqdm
 from transformers import *
 
-from .dataset import Corpus, EncodedDataset
-from .download import download
-from .utils import summary, distributed
+from dataset import Corpus, EncodedDataset
+from download import download
+from utils import summary, distributed
 
 
 def setup_distributed(port=29500):
@@ -42,7 +42,7 @@ def setup_distributed(port=29500):
 
 def load_datasets(data_dir, real_dataset, fake_dataset, tokenizer, batch_size,
                   max_sequence_length, random_sequence_length, epoch_size=None, token_dropout=None, seed=None):
-    
+
     real_corpus = Corpus(real_dataset, data_dir=data_dir)
 
     if fake_dataset == "TWO":
@@ -92,9 +92,13 @@ def train(model: nn.Module, optimizer, device: str, loader: DataLoader, desc='Tr
 
             texts, masks, labels = texts.to(device), masks.to(device), labels.to(device)
             batch_size = texts.shape[0]
+            # print(texts)
+            # print(labels)
 
             optimizer.zero_grad()
-            loss, logits = model(texts, attention_mask=masks, labels=labels)
+            output_dic = model(texts, attention_mask=masks, labels=labels)
+            loss, logits = output_dic["loss"], output_dic["logits"]
+            # print("Loss is:" , model(texts, attention_mask=masks, labels=labels))
             loss.backward()
             optimizer.step()
 
@@ -120,7 +124,7 @@ def validate(model: nn.Module, device: str, loader: DataLoader, votes=1, desc='V
     validation_loss = 0
 
     records = [record for v in range(votes) for record in tqdm(loader, desc=f'Preloading data ... {v}',
-                                                               disable=dist.is_available() and dist.get_rank() > 0)]
+                                                               disable=distributed() and dist.get_rank() > 0)]
     records = [[records[v * len(loader) + i] for v in range(votes)] for i in range(len(loader))]
 
     with tqdm(records, desc=desc, disable=distributed() and dist.get_rank() > 0) as loop, torch.no_grad():
@@ -132,7 +136,8 @@ def validate(model: nn.Module, device: str, loader: DataLoader, votes=1, desc='V
                 texts, masks, labels = texts.to(device), masks.to(device), labels.to(device)
                 batch_size = texts.shape[0]
 
-                loss, logits = model(texts, attention_mask=masks, labels=labels)
+                output_dic = model(texts, attention_mask=masks, labels=labels)
+                loss, logits = output_dic["loss"], output_dic["logits"]
                 losses.append(loss)
                 logit_votes.append(logits)
 
@@ -260,9 +265,9 @@ if __name__ == '__main__':
     parser.add_argument('--random-sequence-length', action='store_true')
     parser.add_argument('--epoch-size', type=int, default=None)
     parser.add_argument('--seed', type=int, default=None)
-    parser.add_argument('--data-dir', type=str, default='data')
-    parser.add_argument('--real-dataset', type=str, default='webtext')
-    parser.add_argument('--fake-dataset', type=str, default='xl-1542M-k40')
+    parser.add_argument('--data-dir', type=str, default='/content/drive/Shareddrives/DARPA/Datasets/Eval1Sources')
+    parser.add_argument('--real-dataset', type=str, default='real')
+    parser.add_argument('--fake-dataset', type=str, default='grover_fake')
     parser.add_argument('--token-dropout', type=float, default=None)
 
     parser.add_argument('--large', action='store_true', help='use the roberta-large model instead of roberta-base')

@@ -7,7 +7,7 @@ from torch.utils.data import Dataset
 from tqdm import tqdm
 from transformers import PreTrainedTokenizer
 
-from .download import download
+from download import download
 
 
 def load_texts(data_file, expected_size=None):
@@ -21,7 +21,7 @@ def load_texts(data_file, expected_size=None):
 
 class Corpus:
     def __init__(self, name, data_dir='data', skip_train=False):
-        download(name, data_dir=data_dir)
+        # download(name, data_dir=data_dir)
         self.name = name
         self.train = load_texts(f'{data_dir}/{name}.train.jsonl', expected_size=250000) if not skip_train else None
         self.test = load_texts(f'{data_dir}/{name}.test.jsonl', expected_size=5000)
@@ -57,7 +57,7 @@ class EncodedDataset(Dataset):
                 text = self.fake_texts[index - len(self.real_texts)]
                 label = 0
 
-        tokens = self.tokenizer.encode(text)
+        tokens = self.tokenizer.encode(text, max_length=self.max_sequence_length, truncation=True)
 
         if self.max_sequence_length is None:
             tokens = tokens[:self.tokenizer.max_len - 2]
