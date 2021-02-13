@@ -47,15 +47,15 @@ class EncodedDataset(Dataset):
     def __getitem__(self, index):
         if self.epoch_size is not None:
             label = self.random.randint(2)
-            texts = [self.fake_texts, self.real_texts][label]
+            texts = [self.real_texts, self.fake_texts][label]
             text = texts[self.random.randint(len(texts))]
         else:
             if index < len(self.real_texts):
                 text = self.real_texts[index]
-                label = 1
+                label = 0
             else:
                 text = self.fake_texts[index - len(self.real_texts)]
-                label = 0
+                label = 1
 
         tokens = self.tokenizer.encode(text, max_length=self.max_sequence_length, truncation=True)
 
