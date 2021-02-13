@@ -64,7 +64,7 @@ def load_datasets(data_dir, real_dataset, fake_dataset, tokenizer, batch_size,
                                    epoch_size, token_dropout, seed)
     train_loader = DataLoader(train_dataset, batch_size, sampler=Sampler(train_dataset), num_workers=0)
 
-    validation_dataset = EncodedDataset(real_valid, fake_valid, tokenizer)
+    validation_dataset = EncodedDataset(real_valid, fake_valid, tokenizer, max_sequence_length, min_sequence_length)
     validation_loader = DataLoader(validation_dataset, batch_size=1, sampler=Sampler(validation_dataset))
 
     return train_loader, validation_loader
@@ -163,7 +163,7 @@ def _all_reduce_dict(d, device):
     output_d = {}
     for (key, value) in sorted(d.items()):
         tensor_input = torch.tensor([[value]]).to(device)
-        torch.distributed.all_reduce(tensor_input)
+        # torch.distributed.all_reduce(tensor_input)
         output_d[key] = tensor_input.item()
     return output_d
 
