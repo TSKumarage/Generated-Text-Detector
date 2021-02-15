@@ -161,6 +161,7 @@ class GeneratedTextDetection:
         pyplot.legend()
         # show the plot
         pyplot.show()
+        pyplot.savefig('ROC.png')
 
 
 def main():
