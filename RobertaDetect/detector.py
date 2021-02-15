@@ -1,11 +1,7 @@
-import math
-
-import torch
-import torch.nn as nn
-import torch.utils.checkpoint
+from torch.nn import Softmax
 from torch.nn import CrossEntropyLoss, MSELoss
 
-from transformers import RobertaTokenizer, RobertaForSequenceClassification
+from transformers import RobertaForSequenceClassification
 
 from transformers.modeling_outputs import SequenceClassifierOutput
 
@@ -15,20 +11,9 @@ class RobertaForTextGenClassification(RobertaForSequenceClassification):
 
     def __init__(self, config):
         super().__init__(config)
-        # self.num_labels = config.num_labels
-        #
-        # self.roberta = RobertaModel(config, add_pooling_layer=False)
-        # self.classifier = RobertaClassificationHead(config)
-        #
-        # self.init_weights()
 
-# [DOCS]    @add_start_docstrings_to_model_forward(ROBERTA_INPUTS_DOCSTRING.format("batch_size, sequence_length"))
-#     @add_code_sample_docstrings(
-#         tokenizer_class=_TOKENIZER_FOR_DOC,
-#         checkpoint="roberta-base",
-#         output_type=SequenceClassifierOutput,
-#         config_class=_CONFIG_FOR_DOC,
-#     )
+        self.soft_max = Softmax(dim=1)
+
     def forward(
         self,
         input_ids=None,
@@ -74,13 +59,15 @@ class RobertaForTextGenClassification(RobertaForSequenceClassification):
                 loss_fct = CrossEntropyLoss()
                 loss = loss_fct(logits.view(-1, self.num_labels), labels.view(-1))
 
+        softmax_logits = self.soft_max(logits)
+
         if not return_dict:
-            output = (logits,) + outputs[2:]
+            output = (softmax_logits,) + outputs[2:]
             return ((loss,) + output) if loss is not None else output
 
         return SequenceClassifierOutput(
             loss=loss,
-            logits=logits,
+            logits=softmax_logits,
             hidden_states=outputs.hidden_states,
             attentions=outputs.attentions,
         )
