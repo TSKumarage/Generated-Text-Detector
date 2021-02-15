@@ -223,6 +223,8 @@ def run(max_epochs=None,
     from torch.utils.tensorboard import SummaryWriter
     writer = SummaryWriter(logdir) if rank == 0 else None
     best_validation_accuracy = 0
+    without_progress = 0
+    earlystop_epochs = 3
 
     for epoch in epoch_loop:
         if world_size > 1:
@@ -244,6 +246,7 @@ def run(max_epochs=None,
                 writer.add_scalar(key, value, global_step=epoch)
 
             if combined_metrics["validation/accuracy"] > best_validation_accuracy:
+                without_progress = 0
                 best_validation_accuracy = combined_metrics["validation/accuracy"]
 
                 model_to_save = model.module if hasattr(model, 'module') else model
@@ -255,6 +258,11 @@ def run(max_epochs=None,
                     ),
                     os.path.join(logdir, "best-model.pt")
                 )
+                
+        without_progress += 1
+
+        if without_progress >= earlystop_epochs:
+            break
 
 
 if __name__ == '__main__':
