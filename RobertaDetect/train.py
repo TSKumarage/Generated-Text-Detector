@@ -20,6 +20,8 @@ from dataset import Corpus, EncodedDataset
 from download import download
 from utils import summary, distributed
 
+from detector import RobertaForTextGenClassification
+
 
 def setup_distributed(port=29500):
     if not dist.is_available() or not torch.cuda.is_available() or torch.cuda.device_count() <= 1:
@@ -198,7 +200,7 @@ def run(max_epochs=None,
     model_name = 'roberta-large' if large else 'roberta-base'
     tokenization_utils.logger.setLevel('ERROR')
     tokenizer = RobertaTokenizer.from_pretrained(model_name)
-    model = RobertaForSequenceClassification.from_pretrained(model_name).to(device)
+    model = RobertaForTextGenClassification.from_pretrained(model_name).to(device)
 
     if rank == 0:
         summary(model)
