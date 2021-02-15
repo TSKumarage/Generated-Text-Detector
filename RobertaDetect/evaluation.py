@@ -60,8 +60,7 @@ class GeneratedTextDetection:
 
         with tqdm(eval_loader, desc="Eval") as loop:
             for texts, masks in loop:
-                if self.args.gpu:
-                    texts, masks = texts.to(self.args.device), masks.to(self.args.device)
+                texts, masks = texts.to(self.args.device), masks.to(self.args.device)
 
                 output_dic = self.model(texts, attention_mask=masks)
                 disc_out = output_dic["logits"]
