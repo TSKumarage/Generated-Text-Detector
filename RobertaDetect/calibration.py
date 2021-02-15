@@ -105,8 +105,7 @@ class GeneratedTextDetection:
             for texts, masks, labels in loop:
 
                 total += labels.size(0)
-                if self.args.gpu:
-                    texts, masks, labels = texts.to(self.args.device), masks.to(self.args.device), labels.to(self.args.device)
+                texts, masks, labels = texts.to(self.args.device), masks.to(self.args.device), labels.to(self.args.device)
 
                 output_dic = self.model(texts, attention_mask=masks)
                 disc_out = output_dic["logits"]
