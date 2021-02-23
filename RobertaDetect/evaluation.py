@@ -2,6 +2,7 @@ import math
 import torch
 import argparse
 from tqdm import tqdm
+import pandas as pd
 
 import random
 import time
@@ -117,7 +118,20 @@ def main():
                         "To receive Steve Gutterman's Week In Russia each week via e-mail, subscribe by clicking here.Alyaksandr Lukashenka's rushed, hushed-up inauguration ceremony in Belarus may evoke memories for Vladimir Putin, and contain a warning about the future as Russia hurtles toward 2024. Also, a COVID-19 surge, Kremlin contortions over the poisoning of Aleksei Navalny, and a UN speech \"rehearsing the defense of a nation in decline.",
                         "As Americans anxiously watch the spread of coronavirus variants that were first identified in Britain and South Africa, scientists are finding a number of new variants that seem to have originated in the United States — and many of them may pose the same kind of extra-contagious threat."]
 
+    sample_eval_frame = pd.read_csv("/content/drive/MyDrive/content/2 15/roberta_validation_data.csv")
+
+    sample_eval_data = sample_eval_frame.text.values
+
+    sample_eval_data = sample_eval_data.tolist()
+
     results = artifact.evaluate(sample_eval_data)
+
+    expected_LLR_score = results["LLR_score"]
+
+    sample_eval_frame["LLR_score"] = pd.DataFrame(expected_LLR_score)
+
+    sample_eval_frame.to_csv("/content/drive/MyDrive/content/2 15/roberta_validation_data_with_LLR.csv", index=False)
+
 
     print(results)
 
