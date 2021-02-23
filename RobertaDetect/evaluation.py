@@ -96,7 +96,7 @@ def main():
     # Input data and files
     parser.add_argument('--model_name', default="robertatextgen", type=str,
                         help='name of the model')
-    parser.add_argument('--check_point', default="/content/drive/MyDrive/model_content/", type=str,
+    parser.add_argument('--check_point', default="/content/", type=str,
                         help='saved model checkpoint directory')
 
     # Model parameters
@@ -104,7 +104,7 @@ def main():
     parser.add_argument('--priors', type=list, default=[0.5, 0.5])
     parser.add_argument('--batch-size', type=int, default=1)
     parser.add_argument('--max-sequence-length', type=int, default=128)
-    parser.add_argument('--large', action='store_true', help='use the roberta-large model instead of roberta-base')
+    parser.add_argument('--large', type=bool, default=False, help='use the roberta-large model instead of roberta-base')
 
     args = parser.parse_args()
 
