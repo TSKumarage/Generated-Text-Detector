@@ -178,12 +178,14 @@ def run(max_epochs=None,
         epoch_size=None,
         seed=None,
         data_dir='data',
-        real_dataset='webtext',
-        fake_dataset='xl-1542M-nucleus',
+        real_dataset='real',
+        fake_dataset='grover_fake',
         token_dropout=None,
         large=False,
         learning_rate=2e-5,
         weight_decay=0,
+        load_from_checkpoint=False,
+        checkpoint_name='neuralnews',
         **kwargs):
     args = locals()
     rank, world_size = setup_distributed()
@@ -201,6 +203,15 @@ def run(max_epochs=None,
     tokenization_utils.logger.setLevel('ERROR')
     tokenizer = RobertaTokenizer.from_pretrained(model_name)
     model = RobertaForTextGenClassification.from_pretrained(model_name).to(device)
+
+    # Load the model from checkpoints
+    if load_from_checkpoint:
+        if device == "cpu":
+            model.load_state_dict(torch.load((data_dir + '{}.pt').format(checkpoint_name),
+                                             map_location='cpu')['model_state_dict'])
+        else:
+            model.load_state_dict(
+                torch.load((data_dir + '{}.pt').format(checkpoint_name))['model_state_dict'])
 
     if rank == 0:
         summary(model)
@@ -283,6 +294,7 @@ if __name__ == '__main__':
     parser.add_argument('--large', action='store_true', help='use the roberta-large model instead of roberta-base')
     parser.add_argument('--learning-rate', type=float, default=2e-5)
     parser.add_argument('--weight-decay', type=float, default=0)
+    parser.add_argument('--load-decay', type=float, default=0)
     args = parser.parse_args()
 
     nproc = int(subprocess.check_output([sys.executable, '-c', "import torch;"
