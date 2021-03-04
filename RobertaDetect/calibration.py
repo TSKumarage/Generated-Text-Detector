@@ -6,7 +6,7 @@ import random
 import time
 
 from torch.utils.data import DataLoader
-from dataset import Corpus, EncodedDataset
+from dataset import Corpus, EncodedDataset, EncodeEvalData
 
 from transformers import *
 from detector import RobertaForTextGenClassification
@@ -26,7 +26,7 @@ def float_range(start, stop, step):
 def load_datasets(data_dir, real_dataset, fake_dataset, tokenizer,
                   max_sequence_length, random_sequence_length):
 
-    real_corpus = Corpus(real_dataset, data_dir=data_dir)
+    real_corpus = Corpus(real_dataset, data_dir=data_dir, single_file=True)
 
     if fake_dataset == "TWO":
         real_train, real_valid = real_corpus.train * 2, real_corpus.valid * 2
@@ -35,14 +35,28 @@ def load_datasets(data_dir, real_dataset, fake_dataset, tokenizer,
         fake_valid = sum([corpus.valid for corpus in fake_corpora], [])
 
     else:
-        fake_corpus = Corpus(fake_dataset, data_dir=data_dir)
+        fake_corpus = Corpus(fake_dataset, data_dir=data_dir, single_file=True)
 
-        real_train, real_valid = real_corpus.train, real_corpus.valid
-        fake_train, fake_valid = fake_corpus.train, fake_corpus.valid
+        real_valid = real_corpus.data
+        fake_valid = fake_corpus.data
 
     min_sequence_length = 10 if random_sequence_length else None
 
     validation_dataset = EncodedDataset(real_valid, fake_valid, tokenizer, max_sequence_length, min_sequence_length)
+    validation_loader = DataLoader(validation_dataset)
+
+    return validation_loader
+
+
+def direct_load_dataset(data_dir, dataset, tokenizer,
+                  max_sequence_length, random_sequence_length=False):
+
+    data_corpus = Corpus(dataset, data_dir=data_dir)
+
+    data_list = data_corpus.data
+
+    validation_dataset = EncodeEvalData(data_list, tokenizer, max_sequence_length)
+
     validation_loader = DataLoader(validation_dataset)
 
     return validation_loader
@@ -172,11 +186,11 @@ def main():
     # Input data and files
     parser.add_argument('--model_name', default="robertatextgen", type=str,
                         help='name of the model')
-    parser.add_argument('--check_point', default="/content/drive/MyDrive/model_content/", type=str,
+    parser.add_argument('--check_point', default="/content/drive/Shareddrives/DARPA/Datasets/Eval1Sources/", type=str,
                         help='saved model checkpoint directory')
     parser.add_argument('--data-dir', type=str, default='/content/drive/Shareddrives/DARPA/Datasets/Eval1Sources')
-    parser.add_argument('--real-dataset', type=str, default='real')
-    parser.add_argument('--fake-dataset', type=str, default='grover_fake')
+    parser.add_argument('--real-dataset', type=str, default='dryrun_real.valid')
+    parser.add_argument('--fake-dataset', type=str, default='dryrun_fake.valid')
 
     # Model parameters
     parser.add_argument('--device', type=str, default=None)
