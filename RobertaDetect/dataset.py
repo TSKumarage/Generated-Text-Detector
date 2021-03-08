@@ -27,9 +27,11 @@ class Corpus:
         if single_file:
             self.data = load_texts(f'{data_dir}/{name}.jsonl', expected_size=250000)
 
-        self.train = load_texts(f'{data_dir}/{name}.train.jsonl', expected_size=250000) if not skip_train else None
-        self.test = load_texts(f'{data_dir}/{name}.test.jsonl', expected_size=5000)
-        self.valid = load_texts(f'{data_dir}/{name}.valid.jsonl', expected_size=5000)
+        else:
+
+            self.train = load_texts(f'{data_dir}/{name}.train.jsonl', expected_size=250000) if not skip_train else None
+            self.test = load_texts(f'{data_dir}/{name}.test.jsonl', expected_size=5000)
+            self.valid = load_texts(f'{data_dir}/{name}.valid.jsonl', expected_size=5000)
 
 
 class EncodedDataset(Dataset):

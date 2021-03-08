@@ -51,7 +51,7 @@ def load_datasets(data_dir, real_dataset, fake_dataset, tokenizer,
 def direct_load_dataset(data_dir, dataset, tokenizer,
                   max_sequence_length, random_sequence_length=False):
 
-    data_corpus = Corpus(dataset, data_dir=data_dir)
+    data_corpus = Corpus(dataset, data_dir=data_dir, single_file=True)
 
     data_list = data_corpus.data
 
@@ -165,17 +165,17 @@ class GeneratedTextDetection:
         eq_tpr = [1 - item for item in eq_fpr]
 
         # plot the roc curve for the model
-        pyplot.plot(lr_fpr, lr_tpr, marker='.', label='DCVAE')
+        pyplot.plot(lr_fpr, lr_tpr, marker='.', label='RobertaTextGen')
         pyplot.plot(eq_fpr, eq_tpr, marker='.', label='EER')
         # axis labels
 
-        pyplot.xlabel('False Positive Rate')
-        pyplot.ylabel('True Positive Rate')
+        pyplot.xlabel('Probability of False Alarm')
+        pyplot.ylabel('Probability of Detection')
         # show the legend
         pyplot.legend()
         # show the plot
         pyplot.show()
-        pyplot.savefig('ROC.png')
+        pyplot.savefig('ROC.pdf')
 
 
 def main():
@@ -184,13 +184,13 @@ def main():
     )
 
     # Input data and files
-    parser.add_argument('--model_name', default="robertatextgen", type=str,
+    parser.add_argument('--model_name', default="drfinetunedroberta", type=str,
                         help='name of the model')
     parser.add_argument('--check_point', default="/content/drive/Shareddrives/DARPA/Datasets/Eval1Sources/", type=str,
                         help='saved model checkpoint directory')
     parser.add_argument('--data-dir', type=str, default='/content/drive/Shareddrives/DARPA/Datasets/Eval1Sources')
-    parser.add_argument('--real-dataset', type=str, default='dryrun_real.valid')
-    parser.add_argument('--fake-dataset', type=str, default='dryrun_fake.valid')
+    parser.add_argument('--real-dataset', type=str, default='dryrun_real_eval.valid')
+    parser.add_argument('--fake-dataset', type=str, default='dryrun_fake_eval.valid')
 
     # Model parameters
     parser.add_argument('--device', type=str, default=None)
