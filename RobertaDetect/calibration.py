@@ -54,8 +54,9 @@ def direct_load_dataset(data_dir, dataset, tokenizer,
     data_corpus = Corpus(dataset, data_dir=data_dir, single_file=True)
 
     data_list = data_corpus.data
+    label_list = data_corpus.label
 
-    validation_dataset = EncodeEvalData(data_list, tokenizer, max_sequence_length)
+    validation_dataset = EncodedSingleDataset(data_list, label_list, tokenizer, max_sequence_length)
 
     validation_loader = DataLoader(validation_dataset)
 
