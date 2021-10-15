@@ -1,13 +1,12 @@
 import json
 import numpy as np
 from typing import List
+import re
 
 import torch
 from torch.utils.data import Dataset
 from tqdm import tqdm
 from transformers import PreTrainedTokenizer
-
-from download import download
 
 
 def load_texts(data_file, label=False, expected_size=None):
@@ -28,7 +27,7 @@ def load_texts(data_file, label=False, expected_size=None):
 
 class Corpus:
     def __init__(self, name, data_dir='data', label=False, skip_train=False, single_file=False):
-        # download(name, data_dir=data_dir)
+
         self.name = name
 
         if single_file:
@@ -74,7 +73,10 @@ class EncodedDataset(Dataset):
                 text = self.fake_texts[index - len(self.real_texts)]
                 label = 1
 
-        tokens = self.tokenizer.encode(text, max_length=self.max_sequence_length, truncation=True)
+        # Preprocessing
+        text = re.sub("[^a-zA-Z ]", "", text)
+
+        tokens = self.tokenizer.encode(text, padding='max_length', max_length=self.max_sequence_length, truncation=True)
 
         if self.max_sequence_length is None:
             tokens = tokens[:self.tokenizer.max_len - 2]
@@ -104,7 +106,7 @@ class EncodedDataset(Dataset):
 
 
 class EncodedSingleDataset(Dataset):
-    def __init__(self, input_texts: List[str], input_labels:List[int], tokenizer: PreTrainedTokenizer,
+    def __init__(self, input_texts: List[str], input_labels: List[int], tokenizer: PreTrainedTokenizer,
                  max_sequence_length: int = None, min_sequence_length: int = None, epoch_size: int = None,
                  token_dropout: float = None, seed: int = None):
         self.input_texts = input_texts
@@ -124,7 +126,10 @@ class EncodedSingleDataset(Dataset):
         text = self.input_texts[index]
         label = self.input_labels[index]
 
-        tokens = self.tokenizer.encode(text, max_length=self.max_sequence_length, truncation=True)
+        # Preprocessing
+        text = re.sub("[^a-zA-Z ]", "", text)
+
+        tokens = self.tokenizer.encode(text, padding='max_length', max_length=self.max_sequence_length, truncation=True)
 
         if self.max_sequence_length is None:
             tokens = tokens[:self.tokenizer.max_len - 2]
@@ -141,7 +146,6 @@ class EncodedSingleDataset(Dataset):
             tokens = np.array(tokens)
             tokens[dropout_mask] = self.tokenizer.unk_token_id
             tokens = tokens.tolist()
-
 
         if self.max_sequence_length is None or len(tokens) == self.max_sequence_length:
             mask = torch.ones(len(tokens) + 2)
@@ -172,7 +176,10 @@ class EncodeEvalData(Dataset):
     def __getitem__(self, index):
         text = self.input_texts[index]
 
-        tokens = self.tokenizer.encode(text, max_length=self.max_sequence_length, truncation=True)
+        # Preprocessing
+        text = re.sub("[^a-zA-Z ]", "", text)
+
+        tokens = self.tokenizer.encode(text, padding='max_length', max_length=self.max_sequence_length, truncation=True)
 
         if self.max_sequence_length is None:
             tokens = tokens[:self.tokenizer.max_len - 2]
